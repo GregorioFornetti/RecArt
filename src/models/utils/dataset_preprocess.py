@@ -1,9 +1,12 @@
 import pandas as pd
 import numpy as np
 import os
-import consts
+import sys
 import shutil
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+import utils.consts
 
 def __create_possible_genres(df_artists):
     # Cria uma lista de todos os generos
@@ -13,13 +16,13 @@ def __create_possible_genres(df_artists):
         for genre in genres.split(','):
             possible_genres.add(genre)
     
-    if not os.path.exists(consts.POSSIBLE_GENRES_PATH):
-        np.savetxt(consts.POSSIBLE_GENRES_PATH, np.array(list(possible_genres)), fmt='%s')
+    if not os.path.exists(utils.consts.POSSIBLE_GENRES_PATH):
+        np.savetxt(utils.consts.POSSIBLE_GENRES_PATH, np.array(list(possible_genres)), fmt='%s')
     
     return possible_genres
 
 def __create_arts_df(df_artists, possible_genres):
-    if not os.path.exists(consts.ARTS_PATH):
+    if not os.path.exists(utils.consts.ARTS_PATH):
         #Cria o dataframe com as imagens e as classes
         for i, artist in df_artists.iterrows():
             arts_number = artist['paintings']
@@ -28,7 +31,7 @@ def __create_arts_df(df_artists, possible_genres):
             art_artist_dict = {}
 
             art_artist_dict['artist id'] = np.repeat(artist['id'], arts_number)
-            art_artist_dict['image path'] = np.array([f'{consts.IMAGES_PATH}/{artist_name}/{artist_name}_{art_num}.jpg' for art_num in range(1, arts_number + 1)])
+            art_artist_dict['image path'] = np.array([os.path.abspath(f'{utils.consts.IMAGES_PATH}/{artist_name}/{artist_name}_{art_num}.jpg') for art_num in range(1, arts_number + 1)])
             for genre in possible_genres:
                 if genre in current_genres:
                     art_artist_dict[genre] = np.ones((arts_number), dtype=np.int8)
@@ -40,7 +43,7 @@ def __create_arts_df(df_artists, possible_genres):
             else:
                 df_arts = pd.concat([df_arts, df_art_artist], ignore_index=True)
         
-        df_arts.to_csv(consts.ARTS_PATH, index=False)
+        df_arts.to_csv(utils.consts.ARTS_PATH, index=False)
 
 def __fix_encoding_imgs_error(df_artists):
     erro1 = 'Albrecht_DuÔòá├¬rer'
@@ -65,7 +68,7 @@ def __fix_encoding_imgs_error(df_artists):
             )
 
 def preprocess_dataset():
-    df_artists = pd.read_csv(consts.ARTISTS_PATH)
+    df_artists = pd.read_csv(utils.consts.ARTISTS_PATH)
 
     possible_genres = __create_possible_genres(df_artists)
     __create_arts_df(df_artists, possible_genres)

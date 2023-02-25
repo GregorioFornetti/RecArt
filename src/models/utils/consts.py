@@ -1,6 +1,6 @@
 SEED = 123
 
-MAIN_PATH = '/content/drive/MyDrive/IA2/Projeto IA 2'
+MAIN_PATH = '..'
 
 DATASET_PATH = f'{MAIN_PATH}/dataset'
 MODELS_SAVES_PATH = f'{MAIN_PATH}/models/model_saves'
