@@ -1,4 +1,8 @@
+import sys
 from abc import ABC, abstractclassmethod
+import tensorflow as tf
+
+
 
 class Model(ABC):
 
@@ -22,7 +26,7 @@ class Model(ABC):
         '''
         Carrega o modelo salvo em "save_path"
         '''
-        pass
+        tf.keras.models.load_model(f'{self.save_path}/params')
 
     def fit(self, data, batch_size=32, epochs=10, save=True):
         '''
