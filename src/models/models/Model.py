@@ -18,6 +18,10 @@ class Model(ABC):
     def _init_attributes(self):
         '''
         Inicializa os atributos que serão utilizados nos métodos genéricos do modelo
+
+        Atualmente é necessário definer as variáveis:
+        - model_name
+        - img_shape
         '''
         pass
     
@@ -25,6 +29,8 @@ class Model(ABC):
     def _create_neural_network(self):
         '''
         Inicializa a estrutura da rede neural
+
+        Deve ser definida em self.model
         '''
         pass
 
@@ -45,8 +51,11 @@ class Model(ABC):
         ---
         '''
         self.df_arts = load_arts_dataset()
+        self.OUTPUT_SIZE = len(read_possible_genres())
+
         self._init_attributes()
         self.__create_folders()
+        
         if not load:
             self._create_neural_network()
         else:
