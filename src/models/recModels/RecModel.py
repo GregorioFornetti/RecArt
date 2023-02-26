@@ -3,9 +3,9 @@ from abc import ABC, abstractclassmethod
 def RecModel(ABC):
 
     @abstractclassmethod
-    def _inicializar_params(self):
+    def _init_params(self):
         '''
-        Inicializar os parâmetros que serão utilizados no __init__ para inicializar o
+        Inicializa os parâmetros que serão utilizados no __init__ para inicializar o
         modelo.
         '''
         pass

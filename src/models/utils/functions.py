@@ -20,7 +20,23 @@ def read_possible_genres():
 def load_arts_dataset():
     return pd.read_csv(utils.consts.ARTS_PATH)
 
-def load_train_generator(df_arts, img_shape):
+def load_train_full_generator(df_arts, img_shape):
+    datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255.)
+
+    train_generator = datagen.flow_from_dataframe(
+        dataframe=df_arts,
+        directory=utils.consts.IMAGES_PATH,
+        x_col='image path',
+        y_col=read_possible_genres(),
+        batch_size=32,
+        seed=utils.consts.SEED,
+        shuffle=True,
+        class_mode="raw",
+        target_size=(img_shape[0], img_shape[1])
+    )
+    return train_generator
+
+def load_train_for_test_generator(df_arts, img_shape):
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255.)
 
     train_df, _ = train_test_split(df_arts, test_size=0.05, stratify=df_arts['artist id'], random_state=utils.consts.SEED)

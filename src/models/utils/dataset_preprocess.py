@@ -31,7 +31,7 @@ def __create_arts_df(df_artists, possible_genres):
             art_artist_dict = {}
 
             art_artist_dict['artist id'] = np.repeat(artist['id'], arts_number)
-            art_artist_dict['image path'] = np.array([os.path.abspath(f'{utils.consts.IMAGES_PATH}/{artist_name}/{artist_name}_{art_num}.jpg') for art_num in range(1, arts_number + 1)])
+            art_artist_dict['image path'] = np.array([f'{utils.consts.IMAGES_PATH}/{artist_name}/{artist_name}_{art_num}.jpg' for art_num in range(1, arts_number + 1)])
             for genre in possible_genres:
                 if genre in current_genres:
                     art_artist_dict[genre] = np.ones((arts_number), dtype=np.int8)
