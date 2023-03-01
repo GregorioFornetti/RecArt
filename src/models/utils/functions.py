@@ -21,6 +21,9 @@ def read_and_resize_img(img_path, img_shape):
     image = tf.image.resize(image, [img_shape[0], img_shape[1]])
     return image
 
+def load_artists_dataset():
+    return df_artists
+
 def load_possible_genres():
     return possible_genres.copy()
 

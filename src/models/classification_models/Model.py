@@ -160,7 +160,7 @@ class Model(ABC):
         
         for _, test_row in test_df.iterrows():
             pred = self.predict(test_row['image path'])
-            pred_df = pd.DataFrame(pred, columns=possible_genres)
+            pred_df = pd.DataFrame([pred], columns=possible_genres)
             preds_df = pd.concat([preds_df, pred_df], ignore_index=True)
         
         y_true = test_df[possible_genres].reset_index(drop=True)
@@ -256,7 +256,7 @@ class Model(ABC):
         '''
         image = read_and_resize_img(img_path, (self.img_shape[0], self.img_shape[1]))
         preds = self.model.predict(image.numpy().reshape(1, 256, 256, 3), verbose=0)
-        return preds
+        return preds[0]
 
     def save_imgs_predictions(self):
         '''
@@ -267,12 +267,13 @@ class Model(ABC):
         Não há retorno, apenas irá salvar no "save_path" os resultados obtidos para cada imagem.
         '''
         df_arts = load_arts_dataset()
-        cols = ['artist id', 'image path', *load_possible_genres()]
-        imgs_preds = pd.DataFrame(columns=cols)
+        df_values = []
 
-        for _, art in df_arts.iterrows():
-            art_df = pd.DataFrame([art['artist id'], art['image path'], *(self.predict_proba(art['image path']))], columns=cols)
-            imgs_preds = pd.concat([imgs_preds, art_df])
+        for i, art in df_arts.iterrows():
+            df_values.append([art['artist id'], art['image path'], *self.predict_proba(art['image path'])])
+            print(f'{i+1} de {len(df_arts)}', end='\r')
+        
+        imgs_preds = pd.DataFrame(df_values, columns=['artist id', 'image path', *load_possible_genres()])
         
         imgs_preds.to_csv(f'{self.save_path}/imgs_predicts.csv', index=False)
     

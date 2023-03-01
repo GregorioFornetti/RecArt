@@ -27,8 +27,24 @@ imgs_preds_teste = pd.DataFrame(
     }
 )
 
+preds = [0, 0, 1, 0.8, 0.4, 0.2, 0.1]
+preds_dict = {"selected": [], "not selected": []}
+for i, pred in enumerate(preds):
+    pred_dict = {
+        "name": possible_genres[i],
+        "probability": pred
+    }
+
+    if pred >= 0.5:
+        preds_dict["selected"].append(pred_dict)
+    else:
+        preds_dict["not selected"].append(pred_dict)
+
+preds_dict["selected"] = sorted(preds_dict["selected"], key=lambda pred: pred['probability'], reverse=True)
+preds_dict["not selected"] = sorted(preds_dict["not selected"], key=lambda pred: pred['probability'], reverse=True)
+
 img_pred_teste = pd.DataFrame(
-    [[0, 0, 1, 1, 0, 0, 0]], columns=['gen 1', 'gen 2', 'gen 3', 'gen 4', 'gen 5', 'gen 6', 'gen 7']
+    [preds], columns=['gen 1', 'gen 2', 'gen 3', 'gen 4', 'gen 5', 'gen 6', 'gen 7']
 )
 
 errors = np.abs(imgs_preds_teste[possible_genres].to_numpy() - img_pred_teste.to_numpy())
@@ -44,5 +60,3 @@ rec_df = rec_df.rename(columns={
     'genres': 'artist genres'
 })
 rec_df = rec_df.sort_values(by='similaridade', ascending=False)
-
-print(rec_df)
