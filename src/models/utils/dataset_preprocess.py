@@ -1,10 +1,8 @@
 import pandas as pd
 import numpy as np
-import os
-import sys
-import shutil
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+import os
+import shutil
 
 import utils.consts
 

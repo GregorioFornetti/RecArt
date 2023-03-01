@@ -70,13 +70,13 @@ class Model(ABC):
         self.results_path = f'{self.save_path}/results'
 
         if not os.path.exists(self.save_path):
-            os.mkdir(self.save_path)
+            os.makedirs(self.save_path)
         
         if not os.path.exists(self.params_path):
-            os.mkdir(self.params_path)
+            os.makedirs(self.params_path)
         
         if not os.path.exists(self.results_path):
-            os.mkdir(self.results_path)
+            os.makedirs(self.results_path)
     
     def fit_full(self, batch_size=32, epochs=10):
         '''
