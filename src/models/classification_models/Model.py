@@ -7,7 +7,7 @@ import os
 from abc import ABC, abstractclassmethod
 from datetime import datetime
 
-from utils.functions import read_and_resize_img, read_possible_genres, load_arts_dataset, load_train_for_test_generator, load_test_dataset, load_train_full_generator
+from utils.functions import read_and_resize_img, load_possible_genres, load_arts_dataset, load_train_for_test_generator, load_test_dataset, load_train_full_generator
 import utils.consts
 
 
@@ -50,7 +50,7 @@ class Model(ABC):
             instanciar a rede neural com pesos padronizados (sendo necessário treina-la).
         ---
         '''
-        self.OUTPUT_SIZE = len(read_possible_genres())
+        self.OUTPUT_SIZE = len(load_possible_genres())
 
         self._init_attributes()
         self.__create_folders()
@@ -132,7 +132,6 @@ class Model(ABC):
         '''
         train_gen = load_train_for_test_generator((self.img_shape[0], self.img_shape[1]))
         self.history = self.model.fit(train_gen, batch_size=batch_size, epochs=epochs)
-        self.save_model()
         return self.evaluate()
     
     def save_model(self):
@@ -155,8 +154,8 @@ class Model(ABC):
         Retorna uma tupla contendo dois DataFrames, o primeiro DataFrame com métricas para cada classe, e o segundo
         um DataFrame de métricas gerais. Esses dois DataFrames serão salvos no "save_path" do modelo.
         '''
-        possible_genres = read_possible_genres()
-        preds_df = pd.DataFrame(columns=possible_genres)
+        possible_genres = load_possible_genres()
+        preds_df = pd.DataFrame(columns=possible_genres, dtype=int)
         test_df = load_test_dataset()
         
         for _, test_row in test_df.iterrows():
@@ -174,15 +173,15 @@ class Model(ABC):
         for genre in possible_genres:
             metrics = {}
 
-            tp += ((pred_df[genre] == 1) & (y_true[genre] == 1)).sum()
-            fp += ((pred_df[genre] == 1) & (y_true[genre] == 0)).sum()
-            fn += ((pred_df[genre] == 0) & (y_true[genre] == 1)).sum()
+            tp += ((preds_df[genre] == 1) & (y_true[genre] == 1)).sum()
+            fp += ((preds_df[genre] == 1) & (y_true[genre] == 0)).sum()
+            fn += ((preds_df[genre] == 0) & (y_true[genre] == 1)).sum()
 
             metrics['genre'] = [genre]
-            metrics['accuracy'] = [accuracy_score(pred_df[genre], y_true[genre])]
-            metrics['precision'] = [precision_score(pred_df[genre], y_true[genre])]
-            metrics['recall'] = [recall_score(pred_df[genre], y_true[genre])]
-            metrics['f1'] = [f1_score(pred_df[genre], y_true[genre])]
+            metrics['accuracy'] = [accuracy_score(preds_df[genre], y_true[genre])]
+            metrics['precision'] = [precision_score(preds_df[genre], y_true[genre])]
+            metrics['recall'] = [recall_score(preds_df[genre], y_true[genre])]
+            metrics['f1'] = [f1_score(preds_df[genre], y_true[genre])]
 
             df_metrics = pd.concat([df_metrics, pd.DataFrame(metrics)], ignore_index=True)
         
@@ -231,7 +230,7 @@ class Model(ABC):
         Retorna uma lista de valores que podem ser 0 ou 1. Se o valor for 0, a imagem não faz parte da classe, se for 1, sim.
         Ex: lista[0] = 1 (a imagem pertence ao gênero na posição 0) e lista[0] = 0 (a imagem não pertence ao gênero)
         '''
-        return (self.predict_proba(img_path) > 0.5).astype(np.uint8)
+        return (self.predict_proba(img_path) > 0.5).astype(int)
 
     def predict_proba(self, img_path):
         '''
@@ -255,8 +254,8 @@ class Model(ABC):
         Retorna uma lista de probabilidades, variando de 0 a 1. Cada valor na lista é a probabilidade de pertencer a uma classe.
         Ex: lista[0] = 0.61 (61% de chance da imagem pertencer a classe na posição 0)
         '''
-        image = read_and_resize_img(img_path)
-        preds = self.model.predict(image.numpy().reshape(1, 256, 256, 3))
+        image = read_and_resize_img(img_path, (self.img_shape[0], self.img_shape[1]))
+        preds = self.model.predict(image.numpy().reshape(1, 256, 256, 3), verbose=0)
         return preds
 
     def save_imgs_predictions(self):
@@ -268,7 +267,7 @@ class Model(ABC):
         Não há retorno, apenas irá salvar no "save_path" os resultados obtidos para cada imagem.
         '''
         df_arts = load_arts_dataset()
-        cols = ['artist id', 'image path', *read_possible_genres()]
+        cols = ['artist id', 'image path', *load_possible_genres()]
         imgs_preds = pd.DataFrame(columns=cols)
 
         for _, art in df_arts.iterrows():
