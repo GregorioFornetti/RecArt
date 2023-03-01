@@ -25,6 +25,13 @@ class RecModel(ABC):
         self._init_params()
         self.imgs_preds = self.model.get_imgs_predictions()
 
+        possible_genres = load_possible_genres()
+        self.positive_weight = 30
+        self.negative_weight = 1
+
+        self.weights = ((self.imgs_preds[possible_genres] >= 0.5) * self.positive_weight) + \
+                       ((self.imgs_preds[possible_genres] < 0.5) * self.negative_weight)
+
     def predict(self, image_path):
         '''
         Irá prever os rotulos/classes da imagem fornecida, e recomendar imagens semelhantes
@@ -105,7 +112,7 @@ class RecModel(ABC):
         img_preds = pd.DataFrame([img_preds], columns=possible_genres)
 
         errors = np.abs(all_imgs_preds[possible_genres].to_numpy() - img_preds.to_numpy())
-        similarities = np.mean(1 - errors, axis=1)
+        similarities = np.sum((1 - errors) * self.weights, axis=1) / np.sum(self.weights, axis=1)
 
         rec_df = all_imgs_preds.join(artists_df.set_index('id'), on='artist id')
         rec_df['similarity'] = similarities

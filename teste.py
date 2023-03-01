@@ -27,7 +27,7 @@ imgs_preds_teste = pd.DataFrame(
     }
 )
 
-preds = [0, 0, 1, 0.8, 0.4, 0.2, 0.1]
+preds = np.array([0, 0, 1, 0.8, 0.4, 0.2, 0.1])
 preds_dict = {"selected": [], "not selected": []}
 for i, pred in enumerate(preds):
     pred_dict = {
@@ -47,8 +47,15 @@ img_pred_teste = pd.DataFrame(
     [preds], columns=['gen 1', 'gen 2', 'gen 3', 'gen 4', 'gen 5', 'gen 6', 'gen 7']
 )
 
+positive_weight = 1000
+negative_weight = 1
+
+weights = ((imgs_preds_teste[possible_genres] >= 0.5) * positive_weight) + \
+          ((imgs_preds_teste[possible_genres] < 0.5) * negative_weight)
+print(weights)
+
 errors = np.abs(imgs_preds_teste[possible_genres].to_numpy() - img_pred_teste.to_numpy())
-similarities = np.mean(1 - errors, axis=1)
+similarities = np.sum((1 - errors) * weights, axis=1) / np.sum(weights, axis=1)
 
 teste_join = imgs_preds_teste.join(artists_teste.set_index('id'), on='artist id')
 teste_join['similaridade'] = similarities
@@ -60,3 +67,4 @@ rec_df = rec_df.rename(columns={
     'genres': 'artist genres'
 })
 rec_df = rec_df.sort_values(by='similaridade', ascending=False)
+print(rec_df)
