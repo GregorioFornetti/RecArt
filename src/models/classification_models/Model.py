@@ -50,7 +50,6 @@ class Model(ABC):
             instanciar a rede neural com pesos padronizados (sendo necessário treina-la).
         ---
         '''
-        self.df_arts = load_arts_dataset()
         self.OUTPUT_SIZE = len(read_possible_genres())
 
         self._init_attributes()
@@ -99,7 +98,7 @@ class Model(ABC):
         
         ---
         '''
-        train_gen = load_train_full_generator(self.df_arts, (self.img_shape[0], self.img_shape[1]))
+        train_gen = load_train_full_generator((self.img_shape[0], self.img_shape[1]))
         self.history = self.model.fit(train_gen, batch_size=batch_size, epochs=epochs)
         self.save_model()
 
@@ -131,8 +130,9 @@ class Model(ABC):
         Retorna uma tupla contendo dois DataFrames, o primeiro DataFrame com métricas para cada classe, e o segundo
         um DataFrame de métricas gerais. Esses dois DataFrames serão salvos no "save_path" do modelo.
         '''
-        train_gen = load_train_for_test_generator(self.df_arts, (self.img_shape[0], self.img_shape[1]))
+        train_gen = load_train_for_test_generator((self.img_shape[0], self.img_shape[1]))
         self.history = self.model.fit(train_gen, batch_size=batch_size, epochs=epochs)
+        self.save_model()
         return self.evaluate()
     
     def save_model(self):
@@ -259,22 +259,34 @@ class Model(ABC):
         preds = self.model.predict(image.numpy().reshape(1, 256, 256, 3))
         return preds
 
-    def save_imgs_predictions(self, data):
+    def save_imgs_predictions(self):
         '''
         Salva as predições de probabilidades para cada imagem
 
         ---
 
-        ## Parâmetros
+        Não há retorno, apenas irá salvar no "save_path" os resultados obtidos para cada imagem.
+        '''
+        df_arts = load_arts_dataset()
+        cols = ['artist id', 'image path', *read_possible_genres()]
+        imgs_preds = pd.DataFrame(columns=cols)
+
+        for _, art in df_arts.iterrows():
+            art_df = pd.DataFrame([art['artist id'], art['image path'], *(self.predict_proba(art['image path']))], columns=cols)
+            imgs_preds = pd.concat([imgs_preds, art_df])
+        
+        imgs_preds.to_csv(f'{self.save_path}/imgs_predicts.csv', index=False)
+    
+    def get_imgs_predictions(self):
+        '''
+        ## Retorno
 
         ---
 
-        data: DataFrame
-            DataFrame completo, para predizer as probabilidades de cada imagem pertencer a cada movimento
-            ártistico
-        
-        --- 
-
-        Não há retorno, apenas irá salvar no "save_path" os resultados obtidos para cada imagem.
+        DataFrame contendo as predições feitas pelo modelo em todas as imagens do dataset. Cada linha possui
+        o id do artista da imagem ("artist id"), o caminho até a imagem ("image path") e várias colunas com
+        os nomes de cada gênero ártistico, com o valor da predição, variando de 0 a 1.
+        OBS: para conseguir executar esse método é preciso ter salvo esse DataFrame utilizando o método
+        "save_imgs_predictions"
         '''
-        pass
+        return pd.read_csv(f'{self.save_path}/imgs_predicts.csv')

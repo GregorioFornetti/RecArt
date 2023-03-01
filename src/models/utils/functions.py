@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import utils.consts
 
-
+df_arts = pd.read_csv(utils.consts.ARTS_PATH)
 
 def read_and_resize_img(img_path, img_shape):
     image = tf.io.read_file(img_path)
@@ -18,9 +18,9 @@ def read_possible_genres():
     return possible_genres
 
 def load_arts_dataset():
-    return pd.read_csv(utils.consts.ARTS_PATH)
+    return df_arts
 
-def load_train_full_generator(df_arts, img_shape):
+def load_train_full_generator(img_shape):
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255.)
 
     train_generator = datagen.flow_from_dataframe(
@@ -36,7 +36,7 @@ def load_train_full_generator(df_arts, img_shape):
     )
     return train_generator
 
-def load_train_for_test_generator(df_arts, img_shape):
+def load_train_for_test_generator(img_shape):
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255.)
 
     train_df, _ = train_test_split(df_arts, test_size=0.05, stratify=df_arts['artist id'], random_state=utils.consts.SEED)
