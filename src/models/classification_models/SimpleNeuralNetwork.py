@@ -1,7 +1,7 @@
-from classification_models.Model import Model
-
 
 import tensorflow as tf
+
+from classification_models.Model import Model
 
 class SimpleNeuralNetwork(Model):
 
