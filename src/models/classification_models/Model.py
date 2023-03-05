@@ -55,10 +55,9 @@ class Model(ABC):
         self._init_attributes()
         self.__create_folders()
         
-        if not load:
-            self._create_neural_network()
-        else:
-            self.model = tf.keras.models.load_model(f'{self.save_path}/params')
+        self._create_neural_network()
+        if load:
+            self.model.load_weights(f'{self.save_path}/params/weights.h5')
     
     def __create_folders(self):
         '''
@@ -138,7 +137,7 @@ class Model(ABC):
         '''
         Salva os parâmetros aprendidos do modelo
         '''
-        self.model.save(self.params_path)
+        self.model.save_weights(f'{self.params_path}/weights.h5')
 
     def evaluate(self):
         '''
@@ -255,7 +254,7 @@ class Model(ABC):
         Ex: lista[0] = 0.61 (61% de chance da imagem pertencer a classe na posição 0)
         '''
         image = read_and_resize_img(img_path, (self.img_shape[0], self.img_shape[1]))
-        preds = self.model.predict(image.numpy().reshape(1, 256, 256, 3), verbose=0)
+        preds = self.model.predict(image.numpy().reshape(1, self.img_shape[0], self.img_shape[1], self.img_shape[2]), verbose=0)
         return preds[0]
 
     def save_imgs_predictions(self):

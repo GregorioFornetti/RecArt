@@ -3,7 +3,7 @@ import tensorflow as tf
 
 from classification_models.Model import Model
 
-class SimpleNeuralNetwork(Model):
+class AlexNet(Model):
 
     def _init_attributes(self):
         '''
@@ -22,6 +22,7 @@ class SimpleNeuralNetwork(Model):
         '''
         self.model = tf.keras.models.Sequential()
 
+        self.model.add(tf.keras.layers.InputLayer(input_shape=self.img_shape))
         self.model.add(tf.keras.layers.Conv2D(96, 11, strides=4, padding='same'))
         self.model.add(tf.keras.layers.Lambda(tf.nn.local_response_normalization))
         self.model.add(tf.keras.layers.Activation('relu'))
