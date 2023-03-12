@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecArt</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="background-screen">
+    <header>
+        <nav>
+            <a href="index.html">
+                RecArt
+            </a>
+            <a href="sobre.html">
+                Sobre
+            </a>
+
+        </nav>
+        
+    </header>
+
+    <main>
+        <form action="recomendar" method="post" enctype='multipart/form-data'>
+            <div class="frame" id="drag_drop">
+                <div class="input_image">
+                    <img src="{{ url_for('static', filename='drag_drop.png') }}" alt="drag end drop" class="img_drag_drop" id="preview">
+                    <input type="file" name="upload_image" id="upload_image" style="display: none;">
+                </div>
+            </div>
+
+            <input type="submit" value="Obter Recomendações" class="btn_form">
+        </form>
+        
+    </main>
+
+    <footer>
+        <p>Feito com carinho por: Gregório Fornetti e Anita Moura</p>
+    </footer>
+    
+</body>
+</html>
+
+<script>
+    const drop_area = document.getElementById('drag_drop')
+    const image_input = document.getElementById("upload_image")
+
+    ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        drop_area.addEventListener(eventName, preventDefaults, false)
+    })
+
+    function preventDefaults (e) {
+        e.preventDefault()
+        e.stopPropagation()
+    }
+
+    drop_area.addEventListener('drop', (e) => {
+        image_input.files = e.dataTransfer.files
+        const files = e.dataTransfer.files
+
+        if (files && files[0]) {
+            var file = new FileReader();
+            file.onload = function(e) {
+                document.getElementById("preview").src = e.target.result;
+            };       
+            file.readAsDataURL(files[0]);
+        }
+    }, false)
+
+    function readImage() {
+        if (this.files && this.files[0]) {
+            var file = new FileReader();
+            file.onload = function(e) {
+                document.getElementById("preview").src = e.target.result;
+            };       
+            file.readAsDataURL(this.files[0]);
+        }
+    }
+    image_input.addEventListener("change", readImage, false);
+</script>

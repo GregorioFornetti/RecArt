@@ -57,15 +57,15 @@ class RecModel(ABC):
                 "selected":
                     [
                         {
-                            "nome": nome movimento artístico
+                            "name": nome movimento artístico
                             "probability": probabilidade da imagem pertencer ao movimento ártistico (valor real entre 0 e 1)
                         }
                         ...
                     ]
-                "not_selected":
+                "not selected":
                     [
                         {
-                            "nome": nome movimento artístico
+                            "name": nome movimento artístico
                             "probability": probabilidade da imagem pertencer ao movimento ártistico (valor real entre 0 e 1)
                         }
                         ...

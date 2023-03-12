@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecArt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_recomendacao.css') }}">
+    <link rel="stylesheet" href="style_recomendacao.css">
+</head>
+<body class="background-screen">
+    <header>
+        <nav>
+            <a href="index.html">
+                RecArt
+            </a>
+            <a href="sobre.html">
+                Sobre
+            </a>
+        </nav>
+    </header>
+
+    <main>
+        <img class="img_usuario" src="{{ url_for('users_images', filename=image_name)}}" alt="IMAGEM">
+        
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalPredicts">Predições</button>
+
+        <h2>Recomendações</h2>
+
+        <ol class="lista_recomendacoes">
+            {% for i, similar_image in similar_images.iterrows() %}              
+                <li class="card_img_recomendacao frame">                    
+                    <img class="img_recomendacao" src="{{ url_for('dataset_images', dirname=similar_image['image path'].split(path_join)[-2], filename=similar_image['image path'].split(path_join)[-1]) }}" data-bs-toggle="modal" data-bs-target="#modalImage">
+                    <br>
+                    <span class="span_recomendacao">
+                        <a class="link_author" href="{{ similar_image['artist wiki'] }}" target="_blank">{{ similar_image['artist name']}}</a>
+                    </span>
+                    <br>
+                    <span class="movimento_artistico">
+                        {{ similar_image['artist genres'] }}
+                    </span>
+                    <br>
+                    <span class="similarity">
+                        Similaridade: {{ "{:.2f}".format(similar_image['similarity'] * 100) }} %
+                    </span>
+                </li>
+            {% endfor %}
+            
+            <table class="table table-dark table-hover table-bordered">
+                <thead>
+                    <tr class="trloco">
+                        <th>Movimento artistico</th>
+                        <th>Predição</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for not_selected_genre in not_selected_genres %}
+                        <tr>
+                            <td>{{ not_selected_genre['name']}}</td>
+                            <td>{{ "{:.2f}".format(not_selected_genre['probability'] * 100) }} %</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </ol>
+
+        <!-- Modal Predições -->
+        <div class="modal fade" id="modalPredicts" tabindex="-1" aria-labelledby="modalPredictsLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalPredictsLabel">Predições</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <h2 class="h5">Selecionados</h2>
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Movimento artistico</th>
+                                    <th scope="col">Predição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for selected_genre in selected_genres %}
+                                    <tr>
+                                        <td>{{ selected_genre['name']}}</td>
+                                        <td>{{ "{:.2f}".format(selected_genre['probability'] * 100) }} %</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <h2 class="h5">Não selecionados</h2>
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Movimento artistico</th>
+                                    <th>Predição</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for not_selected_genre in not_selected_genres %}
+                                    <tr>
+                                        <td>{{ not_selected_genre['name']}}</td>
+                                        <td>{{ "{:.2f}".format(not_selected_genre['probability'] * 100) }} %</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Imagem Full -->
+        <div class="modal fade" id="modalImage" tabindex="-1" aria-labelledby="modalImageLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalImageLabel">Imagem Full</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img id="img_full" src="https://pbs.twimg.com/media/Fq_dXKpaQAAJGyz?format=jpg&name=large">
+                    </div>
+                    <div class="modal-footer">
+                        <a id="btn-download" type="button" class="btn btn-primary" download="">Baixar Imagem</a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Feito com carinho por: Gregório Fornetti e Anita Moura</p>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn_download = document.getElementById('btn-download')
+        const img_full = document.getElementById('img_full')
+        const imgs_recs = document.getElementsByClassName('img_recomendacao')
+
+        for (let img_rec of imgs_recs) {
+            img_rec.addEventListener('click', () => {
+                img_full.src = img_rec.src
+                btn_download.href = img_rec.src
+            })
+        }
+    })
+</script>
