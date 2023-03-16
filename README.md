@@ -37,5 +37,6 @@ raiz do projeto. Para baixar, [clique aqui](https://www.kaggle.com/datasets/ikar
 raiz em sua máquina
 
 5. executar por completo os notebooks (disponiveis no repositório com mesmo nome): ResNet.ipynb, AlexNet.ipynb, KNN.ipynb, SimpleNeuralNet.ipynb
+( isso pode levar muito tempo, porém é necessário, já que não foi possível salvar os parâmetros aprendidos no github, já que eles são muito grandes)
 
 6. dentro da pasta "src/web" executar o comando "flask --app main.py run"
