@@ -9,10 +9,18 @@ import sys
 sys.path.append("..")
 from models.utils.dataset_preprocess import preprocess_dataset
 from models.rec_models.RecSimpleNeuralNetwork import RecSimpleNeuralNetwork
+from models.rec_models.RecAlexNet import RecAlexNet
+from models.rec_models.RecKNN import RecKNN
+from models.rec_models.RecResNet50 import RecResNet50
 
 preprocess_dataset()
 
-rec_simple = RecSimpleNeuralNetwork()
+recommenders = {
+    'simple-net': RecSimpleNeuralNetwork(),
+    'alexnet': RecAlexNet(),
+    #'knn': RecKNN(),
+    'resnet': RecResNet50()
+}
 
 app = Flask(__name__)
 
@@ -35,7 +43,7 @@ def classificar():
     image_path = f"users_images/{secure_filename(image.filename)}"
     image.save(image_path)
 
-    recs = rec_simple.predict(image_path)
+    recs = recommenders[request.form['select-net']].predict(image_path)
 
     return render_template("recomendacoes.html", 
                            image_name=secure_filename(image.filename), 

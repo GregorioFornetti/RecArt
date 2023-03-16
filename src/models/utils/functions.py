@@ -65,6 +65,9 @@ def load_train_for_test_generator(img_shape):
     
     return train_generator
 
+def load_train_dataset():
+    return train_df
+
 def load_test_dataset():
     return test_df
 

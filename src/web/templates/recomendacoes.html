@@ -10,11 +10,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='reset.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style_recomendacao.css') }}">
     <link rel="stylesheet" href="style_recomendacao.css">
+    
 </head>
 <body class="background-screen">
     <header>
         <nav>
-            <a href="index.html">
+            <a href="/">
                 RecArt
             </a>
             <a href="sobre.html">
@@ -48,23 +49,6 @@
                     </span>
                 </li>
             {% endfor %}
-            
-            <table class="table table-dark table-hover table-bordered">
-                <thead>
-                    <tr class="trloco">
-                        <th>Movimento artistico</th>
-                        <th>Predição</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for not_selected_genre in not_selected_genres %}
-                        <tr>
-                            <td>{{ not_selected_genre['name']}}</td>
-                            <td>{{ "{:.2f}".format(not_selected_genre['probability'] * 100) }} %</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </ol>
 
         <!-- Modal Predições -->

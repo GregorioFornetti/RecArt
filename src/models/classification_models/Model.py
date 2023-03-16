@@ -7,7 +7,7 @@ import os
 from abc import ABC, abstractclassmethod
 from datetime import datetime
 
-from utils.functions import read_and_resize_img, load_possible_genres, load_arts_dataset, load_train_for_test_generator, load_test_dataset, load_train_full_generator
+from utils.functions import read_and_resize_img, load_possible_genres, load_arts_dataset, load_train_for_test_generator, load_test_dataset, load_train_full_generator, load_train_dataset
 import utils.consts
 
 
@@ -53,13 +53,13 @@ class Model(ABC):
         self.OUTPUT_SIZE = len(load_possible_genres())
 
         self._init_attributes()
-        self.__create_folders()
+        self._create_folders()
         
         self._create_neural_network()
         if load:
             self.model.load_weights(f'{self.save_path}/params/weights.h5')
     
-    def __create_folders(self):
+    def _create_folders(self):
         '''
         Cria os diretórios para salvar os resultados do modelo
         '''
@@ -172,15 +172,21 @@ class Model(ABC):
         for genre in possible_genres:
             metrics = {}
 
-            tp += ((preds_df[genre] == 1) & (y_true[genre] == 1)).sum()
-            fp += ((preds_df[genre] == 1) & (y_true[genre] == 0)).sum()
+            tp_atual = ((preds_df[genre] == 1) & (y_true[genre] == 1)).sum()
+            fp_atual = ((preds_df[genre] == 1) & (y_true[genre] == 0)).sum()
+
+            tp += tp_atual
+            fp += fp_atual
             fn += ((preds_df[genre] == 0) & (y_true[genre] == 1)).sum()
 
             metrics['genre'] = [genre]
-            metrics['accuracy'] = [accuracy_score(preds_df[genre], y_true[genre])]
-            metrics['precision'] = [precision_score(preds_df[genre], y_true[genre])]
-            metrics['recall'] = [recall_score(preds_df[genre], y_true[genre])]
-            metrics['f1'] = [f1_score(preds_df[genre], y_true[genre])]
+            metrics['positive examples'] = [y_true[genre].sum()]
+            metrics['true positives'] = [tp_atual]
+            metrics['false positives'] = [fp_atual]
+            metrics['accuracy'] = [accuracy_score(y_true[genre], preds_df[genre])]
+            metrics['precision'] = [precision_score(y_true[genre], preds_df[genre])]
+            metrics['recall'] = [recall_score(y_true[genre], preds_df[genre])]
+            metrics['f1'] = [f1_score(y_true[genre], preds_df[genre])]
 
             df_metrics = pd.concat([df_metrics, pd.DataFrame(metrics)], ignore_index=True)
         
@@ -193,6 +199,8 @@ class Model(ABC):
         macro_recall = tp / (tp + fn)
 
         agg_results = pd.DataFrame({
+            'total examples': [len(test_df)],
+            'full hits': [(preds_df == y_true).all(axis=1).sum()],
             'mean accuracy': [df_metrics['accuracy'].mean()],
             'micro precision': [df_metrics['precision'].mean()],
             'micro recall': [df_metrics['recall'].mean()],
@@ -202,6 +210,80 @@ class Model(ABC):
             'macro f1': [2 * ((macro_precision * macro_recall) / (macro_precision + macro_recall))]
         })
         agg_results.to_csv(f'{self.results_path}/{results_dir}/agg_results.csv', index=False)
+
+        return (df_metrics, agg_results)
+    
+    def evaluate_train(self):
+        '''
+        Calcula as métricas de avaliação para a rede neural. Salva os resultados no caminho
+        de "save" do modelo.
+
+        ---
+
+        ## Retorno
+
+        ---
+
+        Retorna uma tupla contendo dois DataFrames, o primeiro DataFrame com métricas para cada classe, e o segundo
+        um DataFrame de métricas gerais. Esses dois DataFrames serão salvos no "save_path" do modelo.
+        '''
+        possible_genres = load_possible_genres()
+        preds_df = pd.DataFrame(columns=possible_genres, dtype=int)
+        test_df = load_train_dataset()
+        
+        for _, test_row in test_df.iterrows():
+            pred = self.predict(test_row['image path'])
+            pred_df = pd.DataFrame([pred], columns=possible_genres)
+            preds_df = pd.concat([preds_df, pred_df], ignore_index=True)
+        
+        y_true = test_df[possible_genres].reset_index(drop=True)
+        df_metrics = pd.DataFrame(columns=['genre', 'accuracy', 'precision', 'recall', 'f1'])
+
+        tp = 0
+        fp = 0
+        fn = 0
+
+        for genre in possible_genres:
+            metrics = {}
+
+            tp_atual = ((preds_df[genre] == 1) & (y_true[genre] == 1)).sum()
+            fp_atual = ((preds_df[genre] == 1) & (y_true[genre] == 0)).sum()
+
+            tp += tp_atual
+            fp += fp_atual
+            fn += ((preds_df[genre] == 0) & (y_true[genre] == 1)).sum()
+
+            metrics['genre'] = [genre]
+            metrics['positive examples'] = [y_true[genre].sum()]
+            metrics['true positives'] = [tp_atual]
+            metrics['false positives'] = [fp_atual]
+            metrics['accuracy'] = [accuracy_score(y_true[genre], preds_df[genre])]
+            metrics['precision'] = [precision_score(y_true[genre], preds_df[genre])]
+            metrics['recall'] = [recall_score(y_true[genre], preds_df[genre])]
+            metrics['f1'] = [f1_score(y_true[genre], preds_df[genre])]
+
+            df_metrics = pd.concat([df_metrics, pd.DataFrame(metrics)], ignore_index=True)
+        
+        results_dir = datetime.now().strftime("%d_%m_%Y_%H_%M")
+        os.mkdir(f'{self.results_path}/{results_dir}')
+
+        df_metrics.to_csv(f'{self.results_path}/{results_dir}/all_classes_results_train.csv', index=False)
+        
+        macro_precision = tp / (tp + fp)
+        macro_recall = tp / (tp + fn)
+
+        agg_results = pd.DataFrame({
+            'total examples': [len(test_df)],
+            'full hits': [(preds_df == y_true).all(axis=1).sum()],
+            'mean accuracy': [df_metrics['accuracy'].mean()],
+            'micro precision': [df_metrics['precision'].mean()],
+            'micro recall': [df_metrics['recall'].mean()],
+            'micro f1': [df_metrics['f1'].mean()],
+            'macro precision': [macro_precision],
+            'macro recall': [macro_recall],
+            'macro f1': [2 * ((macro_precision * macro_recall) / (macro_precision + macro_recall))]
+        })
+        agg_results.to_csv(f'{self.results_path}/{results_dir}/agg_results_train.csv', index=False)
 
         return (df_metrics, agg_results)
             
