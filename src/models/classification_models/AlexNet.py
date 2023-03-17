@@ -24,13 +24,11 @@ class AlexNet(Model):
 
         self.model.add(tf.keras.layers.InputLayer(input_shape=self.img_shape))
         self.model.add(tf.keras.layers.Conv2D(96, 11, strides=4, padding='same'))
-        self.model.add(tf.keras.layers.Lambda(tf.nn.local_response_normalization))
         self.model.add(tf.keras.layers.Activation('relu'))
 
         self.model.add(tf.keras.layers.MaxPooling2D(3, strides=2))
 
         self.model.add(tf.keras.layers.Conv2D(256, 5, strides=4, padding='same'))
-        self.model.add(tf.keras.layers.Lambda(tf.nn.local_response_normalization))
         self.model.add(tf.keras.layers.Activation('relu'))
 
         self.model.add(tf.keras.layers.MaxPooling2D(3, strides=2))
@@ -56,3 +54,4 @@ class AlexNet(Model):
         self.model.compile(optimizer='adam',
                            loss='binary_crossentropy',
                            metrics=['accuracy'])
+        

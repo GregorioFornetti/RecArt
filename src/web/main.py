@@ -18,7 +18,7 @@ preprocess_dataset()
 recommenders = {
     'simple-net': RecSimpleNeuralNetwork(),
     'alexnet': RecAlexNet(),
-    #'knn': RecKNN(),
+    'knn': RecKNN(),
     'resnet': RecResNet50()
 }
 
