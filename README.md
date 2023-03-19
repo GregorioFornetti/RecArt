@@ -40,3 +40,13 @@ raiz em sua máquina
 ( isso pode levar muito tempo, porém é necessário, já que não foi possível salvar os parâmetros aprendidos no github, já que eles são muito grandes)
 
 6. dentro da pasta "src/web" executar o comando "flask --app main.py run"
+
+## Prints
+
+### Homepage
+
+![homepage](https://raw.githubusercontent.com/GregorioFornetti/RecArt/main/prints/home.jpg)
+
+### Pagina de recomendações
+
+![recomendações](https://raw.githubusercontent.com/GregorioFornetti/RecArt/main/prints/recs.jpg)
